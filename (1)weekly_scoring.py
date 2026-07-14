@@ -3,12 +3,12 @@ import joblib
 import os
 from datetime import date
 
-booking_model = joblib.load("booking_model.pkl")
+booking_model = joblib.load("booking_model.pkl") 
 churn_model   = joblib.load("churn_model.pkl")
 model_columns = joblib.load("model_columns.pkl")
 scalers       = joblib.load("scalers.pkl")   # FIX 1
 
-today = date.today().isoformat()
+today = date.today().isoformat() 
 
 data = pd.read_csv("ml_abt_service_5000_rows_NEW_FAKE.csv")
 data = data[data["central_block_flag"] != 1]
