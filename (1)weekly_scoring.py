@@ -19,7 +19,7 @@ raw = data.copy()
 data = data.drop(["customer_id", "vin", "sf_account_id", "businessId"], axis=1, errors="ignore")
 data = pd.get_dummies(data)
 data = data.drop(["target_booked_within_14d", "target_churn_180d"], axis=1, errors="ignore")
-data = data.reindex(columns=model_columns, fill_value=0)
+data = data.reindex(columns=model_columns, fill_value=0) 
 
 booking_proba = booking_model.predict_proba(data)[:, 1]
 churn_proba   = churn_model.predict_proba(data)[:, 1]
