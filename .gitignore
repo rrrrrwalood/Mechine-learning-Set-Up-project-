@@ -1,0 +1,7 @@
+.DS_Store  
+*.pkl
+*.csv
+leads/
+returns/
+__pycache__/
+*.pyc

@@ -8,7 +8,7 @@ if not os.path.exists(diary_file):
     print("customer_diary.csv was not found")
     raise SystemExit
 
-# FIX 4 — read EVERY file the CRM has returned, not just one.
+# Read EVERY file the CRM has returned, not just one.
 # A file returned 3 weeks late still gets picked up.
 return_files = sorted(glob.glob("returns/*.csv"))
 
@@ -53,7 +53,7 @@ diary = diary.merge(
 
 diary["contact_result"] = diary["contact_result_updated"].combine_first(diary["contact_result"])
 diary["actual_booking"] = diary["actual_booking_updated"].combine_first(diary["actual_booking"])
-diary["actual_churn"] = diary["actual_churn_updated"].combine_first(diary["actual_churn"])
+diary["actual_churn"]   = diary["actual_churn_updated"].combine_first(diary["actual_churn"])
 
 diary = diary.drop([
     "contact_result_updated",
@@ -61,8 +61,9 @@ diary = diary.drop([
     "actual_churn_updated"
 ], axis=1)
 
-# FIX 5 — stops duplicates piling up over months
 diary = diary.drop_duplicates(subset=["customer_id", "date_scored"], keep="last")
 
 diary.to_csv(diary_file, index=False)
+
 print("Updated customer_diary.csv")
+print(f"{len(diary)} rows, {diary['actual_churn'].notna().sum()} with confirmed outcomes")
