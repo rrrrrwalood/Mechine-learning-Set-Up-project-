@@ -1,16 +1,20 @@
+from pathlib import Path
+
 import pandas as pd
 import joblib
 import os
 from datetime import date
 
-booking_model = joblib.load("booking_model.pkl")
-churn_model   = joblib.load("churn_model.pkl")
-model_columns = joblib.load("model_columns.pkl")
-scalers       = joblib.load("scalers.pkl")
+base_dir = Path(__file__).resolve().parent
+
+booking_model = joblib.load(base_dir / "booking_model.pkl")
+churn_model   = joblib.load(base_dir / "churn_model.pkl")
+model_columns = joblib.load(base_dir / "model_columns.pkl")
+scalers       = joblib.load(base_dir / "scalers.pkl")
 
 today = date.today().isoformat()
 
-data = pd.read_csv("ml_abt_service_5000_rows_NEW_FAKE.csv")
+data = pd.read_csv(base_dir / "ml_abt_service_5000_rows_NEW_FAKE.csv")
 data = data[data["central_block_flag"] != 1]
 
 # B1 — was between(1, 3). The business rule says outreach starts at N-7,
@@ -22,8 +26,10 @@ data = data[data["days_until_due"] <= 14].copy()
 # Don't contact someone who already booked or responded. Check the diary first.
 
 already_handled = set()# sitcky note # Get the list of customers we've already contacted (from the diary), new skip
-if os.path.exists("customer_diary.csv"):
-    diary = pd.read_csv("customer_diary.csv") 
+diary_file = base_dir / "customer_diary.csv"
+
+if os.path.exists(diary_file):
+    diary = pd.read_csv(diary_file) 
     handled = diary[diary["contact_result"].notna()] # rows the CRM already replied to
     already_handled = set(handled["customer_id"].values) #You take those contacted people's IDs and write them all on your sticky note.
 
@@ -114,8 +120,9 @@ results["actual_churn"]   = pd.NA
 
 # Each day gets its own file. Before, brevo_leads.csv was overwritten
 # every morning, destroying anything the CRM hadn't returned yet.
-os.makedirs("leads", exist_ok=True)
-leads_file = f"leads/leads_{today}.csv"
+leads_dir = base_dir / "leads"
+os.makedirs(leads_dir, exist_ok=True)
+leads_file = leads_dir / f"leads_{today}.csv"
 results.to_csv(leads_file, index=False)
 print(f"Saved {leads_file} ({len(results)} customers)")
 
@@ -131,8 +138,6 @@ diary_batch = results[[
     "actual_booking",
     "actual_churn"
 ]].copy()
-
-diary_file = "customer_diary.csv"
 
 if os.path.exists(diary_file):
     # If you re-run today, delete today's rows first. The old code
