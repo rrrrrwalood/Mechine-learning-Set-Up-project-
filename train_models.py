@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
@@ -5,7 +7,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import average_precision_score
 
 
-data = pd.read_csv("ml_abt_service_5000_rows.csv")
+base_dir = Path(__file__).resolve().parent
+csv_path = base_dir / "ml_abt_service_5000_rows.csv"
+
+
+data = pd.read_csv(csv_path)
 data = data[data["central_block_flag"] != 1]
 
 raw = data.copy()
@@ -18,7 +24,7 @@ scalers = {
     "money_min": float(raw["avg_invoice_amt_qar_12m"].min()),
     "money_max": float(raw["avg_invoice_amt_qar_12m"].max()),
 }
-joblib.dump(scalers, "scalers.pkl")
+joblib.dump(scalers, str(base_dir / "scalers.pkl"))
 
 customer_ids = data["customer_id"]
 
@@ -56,7 +62,7 @@ print("Churn PR-AUC =", round(average_precision_score(yc_test, churn_proba), 3))
 print("Booking base rate =", round(yb_test.mean(), 3)) # what % of customers booked
 print("Booking PR-AUC =", round(average_precision_score(yb_test, booking_proba), 3)) # how good my model is at finding bookers (higher = better)
 
-joblib.dump(booking_model, "booking_model.pkl")
-joblib.dump(churn_model, "churn_model.pkl")
-joblib.dump(list(X.columns), "model_columns.pkl")
+joblib.dump(booking_model, str(base_dir / "booking_model.pkl"))
+joblib.dump(churn_model, str(base_dir / "churn_model.pkl"))
+joblib.dump(list(X.columns), str(base_dir / "model_columns.pkl"))
 print("Saved models")
