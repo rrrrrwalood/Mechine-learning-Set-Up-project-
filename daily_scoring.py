@@ -80,12 +80,12 @@ results = pd.DataFrame({
 
 # B1 — which reminder is this? The CRM needs to know.
 def get_stage(days):
-    if days <= 7:
+    if days >= 6:
         return "N-7 initial"
-    elif days <= 12:
+    elif days >= 4:
         return "N-5 follow-up"
     else:
-        return "N-14 early"
+        return "Call Centre"
 
 results["outreach_stage"] = results["days_until_due"].apply(get_stage)
 
@@ -101,8 +101,10 @@ def resolve_channel(row):
     else:
         return "Call Centre"
 
-results["resolved_channel"] = results.apply(resolve_channel, axis=1)
-
+results["resolved_channel"] = results.apply(
+    lambda r: "Call Centre" if r["outreach_stage"] == "Call Centre" else resolve_channel(r),
+    axis=1
+)
 results = results.sort_values("rank_score", ascending=False)
 
 results["date_scored"]    = today
